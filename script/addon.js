@@ -14,7 +14,6 @@ var vs_text1 = '', vs_text2 = '';
 var user_id_pattern1 = /^u[0-9]+$/;
 var user_id_pattern2 = /^u[0-9]+\-/;
 var kuafu_name_pattern = /^\[[0-9]+\]/;
-var ansi_color_pattern = /\u001b\[[;0-9]+m/g;
 var skills = new Map();
 skills.put('九天龙吟剑法', ['排云掌法', '雪饮狂刀']);
 skills.put('覆雨剑法', ['翻云刀法', '如来神掌']);
@@ -72,7 +71,7 @@ window.gSocketMsg.dispatchMessage = function(msg) {
 								var j = name.indexOf(']');
 								name = name.substr(0, j) + '区' + name.substr(j, name.length - j);
 							}
-							var pfm = msg.get('name').replace(ansi_color_pattern, '');
+							var pfm = removeSGR(msg.get('name'));
 							vs_text = skill_chains.indexOf(pfm) >= 0 ? vs_text1 + vs_text2 : vs_text2;
 							if (vs_text.indexOf(name) >= 0) {
 								var is_defence = false;
@@ -181,6 +180,9 @@ function get_friend_index(id) {
 	}
 	return friend_list.indexOf(id);
 }
+function removeSGR(text) {
+	return text ? text.replace(/\u001b\[[;0-9]+m/g, '') : '';
+}
 function auto_pfm(vs_info, pfm, v1, p1, v2, p2) {
 	var xdz = parseInt(vs_info.get(v1 + '_xdz' + p1));
 	var max_kee = parseInt(vs_info.get(v2 + '_max_kee' + p2));
@@ -218,7 +220,7 @@ function auto_pfm(vs_info, pfm, v1, p1, v2, p2) {
 		for (var i = 0; i < 4; i++) {
 			var button = window.g_obj_map.get('skill_button' + (i + 1));
 			if (button && parseInt(button.get('xdz')) <= xdz) {
-				buttons.push(button.get('name').replace(ansi_color_pattern, ''));
+				buttons.push(removeSGR(button.get('name')));
 			} else {
 				buttons.push('');
 			}
@@ -321,7 +323,7 @@ var perform = function() {
 	for (var i = 0; i < 4; i++) {
 		var button = window.g_obj_map.get('skill_button' + (i + 1));
 		if (button && parseInt(button.get('xdz')) <= xdz) {
-			buttons.push(button.get('name').replace(ansi_color_pattern, ''));
+			buttons.push(removeSGR(button.get('name')));
 		} else {
 			buttons.push('');
 		}
@@ -402,6 +404,94 @@ var kill = function() {
 		}, 150);
 	}
 };
+function find_target(nameOrId, types) {
+	var room = window.g_obj_map.get('msg_room');
+	if (!room) {
+		return null;
+	}
+	if (!types || $.inArray('npc', types) >= 0) {
+		for (var t, i = 1; (t = room.get('npc' + i)) != undefined; i++) {
+			var s = t.split(',');
+			if (s.length > 1) {
+				if (s[0] == nameOrId || s[1] == nameOrId) {
+					return [s[0], s[1], 'npc'];
+				}
+			} else {
+				if (s[0] == nameOrId) {
+					return [s[0], null, 'npc'];
+				}
+			}
+		}
+	}
+	if (!types || $.inArray('item', types) >= 0) {
+		for (var t, i = 1; (t = room.get('item' + i)) != undefined; i++) {
+			var s = t.split(',');
+			if (s.length > 1) {
+				if (s[0] == nameOrId || s[1] == nameOrId) {
+					return [s[0], s[1], 'item'];
+				}
+			} else {
+				if (s[0] == nameOrId) {
+					return [s[0], null, 'item'];
+				}
+			}
+		}
+	}
+	if (!types || $.inArray('user', types) >= 0) {
+		for (var t, i = 1; (t = room.get('user' + i)) != undefined; i++) {
+			var s = t.split(',');
+			if (s.length > 1) {
+				if (s[0] == nameOrId || s[1] == nameOrId) {
+					return [s[0], s[1], 'user'];
+				}
+			} else {
+				if (s[0] == nameOrId) {
+					return [s[0], null, 'user'];
+				}
+			}
+		}
+	}
+	return null;
+}
+function process_cmd(line) {
+	var pc = ['', true];
+	var arr = line.split(';');
+	for (var i = 0; i < arr.length; i++) {
+		var cmd = $.trim(arr[i]);
+		if (cmd) {
+			var args = ['', ''];
+			var j = cmd.indexOf(' ');
+			if (j >= 0) {
+				args[0] = $.trim(cmd.substr(0, j));
+				args[1] = $.trim(cmd.substr(j + 1));
+			} else {
+				args[0] = cmd;
+			}
+			if (!translate(args)) {
+				pc[1] = false;
+			}
+			if (args[0]) {
+				if (args[1]) {
+					cmd = args[0] + ' ' + args[1];
+				} else {
+					cmd = args[0];
+				}
+				if (pc[0]) {
+					pc[0] += ',';
+				}
+				if (args[1]) {
+					pc[0] += args[0] + ' ' + args[1];
+				} else {
+					pc[0] += args[0];
+				}
+			}
+		}
+	}
+	return pc;
+}
+function translate(args) {
+	return false;
+}
 var cmdline = $('<div id="cmdline" style="position: fixed; left: 0px; top: 0px; width: 503px; height: 44px; border: 1px solid rgb(53, 37, 21);"><table align="center" border="0" style="width:100%"><tr><td style="width:65%" align="left"><input id="cmd_box" class="chat_input" type="text" value=""></td><td style="width:35%" align="left"><button type="button" cellpadding="0" cellspacing="0" onclick="sendCommand();" class="cmd_click3"><span class="out2">发送</span></button></td></tr></table></div>');
 var cmdbox = $(':text', cmdline);
 var history_cmds = [];
