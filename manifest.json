@@ -1,0 +1,17 @@
+{
+  "name": "lunjian extension",
+  "version": "2.0",
+  "manifest_version": 2,
+  "description": "an extension for lunjian mud",
+  "content_scripts": [
+    {
+      "matches": ["http://sword-direct1.yytou.cn/*", "http://sword-server1.yytou.cn/*", "http://sword-server1-360.yytou.cn/*"],
+	  "all_frames": true,
+      "js": ["lunjian.js"],
+	  "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    "script/addon.js"
+  ]
+}
