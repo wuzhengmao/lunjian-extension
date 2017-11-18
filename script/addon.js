@@ -3,7 +3,7 @@ if (!window.gSocketMsg|| !window.gSocketMsg2 || window.mingy_addon) {
 	return;
 }
 if (!window.g_obj_map.get('msg_attrs')) {
-	clickButton('attrs');
+	send_cmd('attrs');
 	return;
 }
 var _dispatch_message = window.gSocketMsg.dispatchMessage;
@@ -27,6 +27,105 @@ skills.put('孔雀翎', ['如来神掌', '织冰剑法']);
 var skill_chains = ['九天龙吟剑法', '覆雨剑法', '织冰剑法', '排云掌法', '如来神掌', '雪饮狂刀', '翻云刀法', '飞刀绝技', '孔雀翎', '道种心魔经', '生生造化功', '幽影幻虚步', '万流归一'];
 var defence_patterns = [/(.*)顿时被冲开老远，失去了攻击之势！/, /(.*)被(.*)的真气所迫，只好放弃攻击！/, /(.*)衣裳鼓起，真气直接将(.*)逼开了！/, /(.*)找到了闪躲的空间！/, /(.*)朝边上一步闪开！/, /面对(.*)的攻击，(.*)毫不为惧！/, /(.*)使出“(.*)”，希望扰乱(.*)的视线！/];
 var friend_list = ['u2819948','u2771755','u3324214','u2626349','u2634663','u2612522','u3019083','u2860723','u2617077','u2617092','u2616450','u2637402','u2617579','u2616211','u3444969','u6099572','u5903155','u2619076','u2617955','u2617521','u4643196','u2747758','u2615809','u2616994','u3093166','u3827219','u3288641','u2756496','u3071047','u2863851','u3884564','u2637468','u2790969','u3399330','u3892886'];
+var aliases = new Map();
+aliases.put('l', 'look');
+aliases.put('i', 'items');
+aliases.put('k', 'kill');
+aliases.put('h', 'halt');
+aliases.put('e', 'east');
+aliases.put('s', 'south');
+aliases.put('w', 'west');
+aliases.put('n', 'north');
+aliases.put('se', 'southeast');
+aliases.put('sw', 'southwest');
+aliases.put('ne', 'northeast');
+aliases.put('nw', 'northwest');
+aliases.put('u', 'up');
+aliases.put('d', 'down');
+aliases.put('jiali', 'enforce');
+aliases.put('lz', 'items use snow_qiannianlingzhi');
+aliases.put('zhenshen', 'find_qinglong_road 996146');
+aliases.put('share', 'share_ok 1;share_ok 2;share_ok 3;share_ok 4;share_ok 5;share_ok 6;share_ok 7');
+aliases.put('tiaoya', 'nw;w;sw;w;n;n;w;w;w;s;w;nw;ne;ne;ne;e;e;e;e;e;s;e');
+var map_ids = new Map();
+map_ids.put('xueting', '1');
+map_ids.put('xt', '1');
+map_ids.put('luoyang', '2');
+map_ids.put('ly', '2');
+map_ids.put('huashancun', '3');
+map_ids.put('hsc', '3');
+map_ids.put('huashan', '4');
+map_ids.put('hs', '4');
+map_ids.put('yangzhou', '5');
+map_ids.put('yz', '5');
+map_ids.put('gaibang', '6');
+map_ids.put('gb', '6');
+map_ids.put('qiaoyin', '7');
+map_ids.put('qy', '7');
+map_ids.put('emei', '8');
+map_ids.put('em', '8');
+map_ids.put('hengshan', '9');
+map_ids.put('hs2', '9');
+map_ids.put('wudang', '10');
+map_ids.put('wd', '10');
+map_ids.put('wanyue', '11');
+map_ids.put('wy', '11');
+map_ids.put('shuiyan', '12');
+map_ids.put('sy', '12');
+map_ids.put('shaolin', '13');
+map_ids.put('sl', '13');
+map_ids.put('tangmen', '14');
+map_ids.put('tm', '14');
+map_ids.put('qingcheng', '15');
+map_ids.put('qc', '15');
+map_ids.put('xiaoyao', '16');
+map_ids.put('xy', '16');
+map_ids.put('kaifang', '17');
+map_ids.put('kf', '17');
+map_ids.put('mingjiao', '18');
+map_ids.put('mj', '18');
+map_ids.put('quanzhen', '19');
+map_ids.put('qz', '19');
+map_ids.put('gumu', '20');
+map_ids.put('gm', '20');
+map_ids.put('baituo', '21');
+map_ids.put('bt', '21');
+map_ids.put('songshan', '22');
+map_ids.put('ss', '22');
+map_ids.put('meizhuang', '23');
+map_ids.put('mz', '23');
+map_ids.put('taishan', '24');
+map_ids.put('ts', '24');
+map_ids.put('daqi', '25');
+map_ids.put('dq', '25');
+map_ids.put('dazhao', '26');
+map_ids.put('dz', '26');
+map_ids.put('heimuya', '27');
+map_ids.put('hmy', '27');
+map_ids.put('mojiao', '27');
+map_ids.put('mj2', '27');
+map_ids.put('xingxiu', '28');
+map_ids.put('xx', '28');
+map_ids.put('maoshan', '29');
+map_ids.put('ms', '29');
+map_ids.put('taohuadao', '30');
+map_ids.put('thd', '30');
+map_ids.put('tiexue', '31');
+map_ids.put('tx', '31');
+map_ids.put('murong', '32');
+map_ids.put('mr', '32');
+map_ids.put('dali', '33');
+map_ids.put('dl', '33');
+map_ids.put('duanjian', '34');
+map_ids.put('dj', '34');
+map_ids.put('binghuodao', '35');
+map_ids.put('bhd', '35');
+map_ids.put('xiakedao', '36');
+map_ids.put('xkd', '36');
+map_ids.put('jueqinggu', '37');
+map_ids.put('jqg', '37');
+map_ids.put('bihai', '38');
+map_ids.put('bh', '38');
 window.gSocketMsg.dispatchMessage = function(msg) {
 	_dispatch_message.apply(this, arguments);
 	if (join_combat_target && msg.get('type') == 'vs') {
@@ -148,10 +247,10 @@ function try_join_combat(vs_info, target, ignore_check) {
 	var t = new Date().getTime();
 	if (!ignore_check && player_id && t - last_fight_time >= 3000) {
 		last_fight_time = t;
-		clickButton('fight ' + player_id);
+		send_cmd('fight ' + player_id);
 	} else if (t - last_kill_time >= 1000) {
 		last_kill_time = t;
-		clickButton('kill ' + target);
+		send_cmd('kill ' + target);
 	}
 	return true;
 }
@@ -230,14 +329,14 @@ function auto_pfm(vs_info, pfm, v1, p1, v2, p2) {
 			if (pfms) {
 				for (var i = 0; i < buttons.length; i++) {
 					if (buttons[i] && pfms.indexOf(buttons[i]) >= 0) {
-						clickButton('playskill ' + (i + 1));
+						send_cmd('playskill ' + (i + 1));
 						return;
 					}
 				}
 			}
 			for (var i = 0; i < buttons.length; i++) {
 				if (buttons[i] && skills.containsKey(buttons[i])) {
-					clickButton('playskill ' + (i + 1));
+					send_cmd('playskill ' + (i + 1));
 					break;
 				}
 			}
@@ -246,7 +345,7 @@ function auto_pfm(vs_info, pfm, v1, p1, v2, p2) {
 			if (pfms) {
 				for (var i = 0; i < buttons.length; i++) {
 					if (buttons[i] && pfms.indexOf(buttons[i]) >= 0) {
-						clickButton('playskill ' + (i + 1));
+						send_cmd('playskill ' + (i + 1));
 						return;
 					}
 				}
@@ -255,22 +354,6 @@ function auto_pfm(vs_info, pfm, v1, p1, v2, p2) {
 		}
 	}
 }
-window.send_cmd = function(cmds, k) {
-	var arr = cmds.split('\n');
-	if (arr.length > 4) {
-		_send_cmd(arr, k, 0);
-	} else {
-		clickButton(cmds, k);
-	}
-};
-var _send_cmd = function(cmds, k, i) {
-	clickButton(cmds[i], k);
-	if (++i < cmds.length) {
-		setTimeout(function() {
-			_send_cmd(cmds, k, i);
-		}, Math.floor(100 + Math.random() * 20));
-	}
-};
 function rejoin(change_side) {
 	if (!window.is_fighting) {
 		return;
@@ -304,7 +387,7 @@ function rejoin(change_side) {
 				}
 			}
 			cmd += 'kill ' + npc_id;
-			clickButton(cmd);
+			send_cmd(cmd);
 		}
 	}
 }
@@ -337,7 +420,7 @@ function select_perform(buttons) {
 			if (pfms) {
 				for (var j = i + 1; j < buttons.length; j++) {
 					if (buttons[j] && pfms.indexOf(buttons[j]) >= 0) {
-						clickButton('playskill ' + (i + 1) + '\nplayskill ' + (j + 1));
+						send_cmd('playskill ' + (i + 1) + '\nplayskill ' + (j + 1));
 						return true;
 					}
 				}
@@ -346,7 +429,7 @@ function select_perform(buttons) {
 	}
 	for (var i = 0; i < buttons.length; i++) {
 		if (buttons[i] && skills.containsKey(buttons[i])) {
-			clickButton('playskill ' + (i + 1));
+			send_cmd('playskill ' + (i + 1));
 			return true;
 		}
 	}
@@ -374,7 +457,7 @@ var kill = function() {
 		}
 		join_combat_target = npc;
 		last_kill_time = new Date().getTime();
-		clickButton('kill ' + npc + '\nwatch_vs ' + npc);
+		send_cmd('kill ' + npc + '\nwatch_vs ' + npc);
 		var my_id = window.g_obj_map.get('msg_attrs').get('id');
 		h_interval = setInterval(function() {
 			var is_fighting = false;
@@ -399,7 +482,7 @@ var kill = function() {
 				join_combat_target = null;
 			} else {
 				last_kill_time = new Date().getTime();
-				clickButton('kill ' + npc + '\nwatch_vs ' + npc);
+				send_cmd('kill ' + npc + '\nwatch_vs ' + npc);
 			}
 		}, 150);
 	}
@@ -453,45 +536,214 @@ function find_target(nameOrId, types) {
 	}
 	return null;
 }
-function process_cmd(line) {
+var task_handler;
+function stop_task() {
+	if (task_handler) {
+		clearInterval(task_handler);
+		task_handler = undefined;
+		console.log('task stopped.');
+	}
+}
+function execute_cmd(cmd) {
+	if (cmd.indexOf('#loop ') == 0) {
+		cmd = $.trim(cmd.substr(6));
+		if (cmd) {
+			var interval = 500;
+			var i = cmd.indexOf(' ');
+			if (i >= 0) {
+				var t = parseInt(cmd.substr(0, i));
+				if (!isNaN(t)) {
+					interval = t;
+					cmd = $.trim(cmd.substr(i + 1));
+				}
+			}
+			if (cmd) {
+				stop_task();
+				console.log('starting loop...');
+				var pc;
+				task_handler = setInterval(function() {
+					if (!pc) {
+						pc = process_cmdline(cmd);
+					}
+					if (pc && pc[0]) {
+						send_cmd(pc[0]);
+					}
+				}, interval);
+			}
+		}
+	} else if (cmd == '#stop') {
+		stop_task();
+	} else if (cmd) {
+		var pc = process_cmdline(cmd);
+		if (pc[1]) {
+			//clickButton('go_chat');
+		} else {
+			//clickButton('quit_chat');
+		}
+		if (pc[0]) {
+			send_cmd(pc[0]);
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+function process_cmdline(line) {
 	var pc = ['', true];
 	var arr = line.split(';');
 	for (var i = 0; i < arr.length; i++) {
 		var cmd = $.trim(arr[i]);
 		if (cmd) {
-			var args = ['', ''];
-			var j = cmd.indexOf(' ');
-			if (j >= 0) {
-				args[0] = $.trim(cmd.substr(0, j));
-				args[1] = $.trim(cmd.substr(j + 1));
-			} else {
-				args[0] = cmd;
-			}
-			if (!translate(args)) {
+			var c = process_cmd(cmd);
+			if (!c[1]) {
 				pc[1] = false;
 			}
-			if (args[0]) {
-				if (args[1]) {
-					cmd = args[0] + ' ' + args[1];
-				} else {
-					cmd = args[0];
-				}
+			if (c[0]) {
 				if (pc[0]) {
-					pc[0] += ',';
+					pc[0] += ';';
 				}
-				if (args[1]) {
-					pc[0] += args[0] + ' ' + args[1];
-				} else {
-					pc[0] += args[0];
-				}
+				pc[0] += c[0];
 			}
 		}
 	}
 	return pc;
 }
-function translate(args) {
-	return false;
+function process_cmd(cmd) {
+	var args = ['', ''];
+	var i = cmd.indexOf(' ');
+	if (i >= 0) {
+		args[0] = $.trim(cmd.substr(0, i));
+		args[1] = $.trim(cmd.substr(i + 1));
+	} else {
+		args[0] = cmd;
+	}
+	var alias = aliases.get(args[0]);
+	if (alias) {
+		var line = alias;
+		if (args[1]) {
+			line += ' ' + args[1];
+		}
+		return process_cmdline(line);
+	}
+	var pc = ['', translate(args)];
+	if (args[0]) {
+		if (pc[0]) {
+			pc[0] += ';';
+		}
+		if (args[1]) {
+			pc[0] += args[0] + ' ' + args[1];
+		} else {
+			pc[0] += args[0];
+		}
+	}
+	return pc;
 }
+function translate(args) {
+	var is_chat = false;
+	if (args[0] == 'look') {
+		if (!args[1]) {
+			args[0] = 'golook_room';
+		} else {
+			var target = find_target(args[1]);
+			if (target) {
+				if (target[2] == 'npc') {
+					args[0] = 'look_npc';
+					args[1] = target[0];
+				} else if (target[2] == 'item') {
+					args[0] = 'look_item';
+					args[1] = target[0];
+				} else {
+					args[0] = 'score';
+					args[1] = target[0];
+				}
+			} else {
+				arg[0] = '';
+			}
+		}
+	} else if (args[0] == 'fight' || args[0] == 'watch') {
+		if (args[0] == 'watch') {
+			args[0] = 'watch_vs';
+		}
+		var target = find_target(args[1], ['npc', 'user']);
+		if (target) {
+			args[1] = target[0];
+		}
+	} else if (args[0] == 'kill' || args[0] == 'ask' || args[0] == 'give' || args[0] == 'buy') {
+		var target = find_target(args[1], ['npc']);
+		if (target) {
+			args[1] = target[0];
+		}
+	} else if (args[0] == 'get') {
+		var target = find_target(args[1], ['item']);
+		if (target) {
+			args[1] = target[0];
+		}
+	} else if (args[0] == 'east' || args[0] == 'south' || args[0] == 'west' || args[0] == 'north' || args[0] == 'southeast' || args[0] == 'southwest' || args[0] == 'northeast' || args[0] == 'northwest' || args[0] == 'up' || args[0] == 'down') {
+		var room = window.g_obj_map.get('msg_room');
+		if (room) {
+			var random = room.get('go_random');
+			if (random) {
+				args[1] = args[0] + '.' + random;
+			} else {
+				args[1] = args[0];
+			}
+		}
+		args[0] = 'go';
+	} else if (args[0] == 'fly') {
+		args[0] = 'jh';
+		var id = map_ids.get(args[1]);
+		if (id) {
+			args[1] = id;
+		}
+	} else if (args[0] == 'tu') {
+		args[0] = 'cangbaotu_op1';
+		args[1] = '';
+	} else if (args[0] == 'dig') {
+		args[0] = 'dig go';
+		args[1] = '';
+	} else if (args[0] == 'halt') {
+		args[0] = 'escape';
+		args[1] = '';
+	} else if (args[0] == 'heal') {
+		args[0] = 'recovery';
+		args[1] = '';
+	} else if (args[0] == 'quest') {
+		args[0] = 'family_quest';
+		args[1] = '';
+	} else if (args[0] == 'task') {
+		args[0] = 'task_quest';
+		if (args[1] == 'cancel') {
+			args[0] = 'auto_tasks';
+		}
+	} else if (args[0] == 'map') {
+		args[0] = 'client_map';
+		args[1] = '';
+	} else if (args[0] == 'chat' || args[0] == 'rumor') {
+		if (!cmd[1]) {
+			cmd[0] = '';
+		}
+		is_chat = true;
+	}
+	return is_chat;
+}
+var cmd_queue = [];
+function send_cmd(cmd, k) {
+	var started = cmd_queue.length > 0;
+	cmd_queue = cmd_queue.concat(cmd.split(';'));
+	if (!started) {
+		_send_cmd(k);
+	}
+}
+var _send_cmd = function(k) {
+	if (cmd_queue.length > 0) {
+		clickButton(cmd_queue.shift(), k);
+		if (cmd_queue.length > 0) {
+			setTimeout(function() {
+				_send_cmd(k);
+			}, Math.floor(120 + Math.random() * 20));
+		}
+	}
+};
 var cmdline = $('<div id="cmdline" style="position: fixed; left: 0px; top: 0px; width: 503px; height: 44px; border: 1px solid rgb(53, 37, 21);"><table align="center" border="0" style="width:100%"><tr><td style="width:65%" align="left"><input id="cmd_box" class="chat_input" type="text" value=""></td><td style="width:35%" align="left"><button type="button" cellpadding="0" cellspacing="0" onclick="sendCommand();" class="cmd_click3"><span class="out2">发送</span></button></td></tr></table></div>');
 var cmdbox = $(':text', cmdline);
 var history_cmds = [];
@@ -531,6 +783,7 @@ function sendCommand() {
 			history_cmds = history_cmds.slice(-20);
 		}
 	}
+	execute_cmd(cmd);
 }
 $(document).keydown(function(e) {
 	if (e.which == 120) { // F9
@@ -557,6 +810,22 @@ $(document).keydown(function(e) {
 		auto_attack = !auto_attack;
 		notify_fail('auto attack ' + (auto_attack ? 'starting' : 'stopped'));
 		e.preventDefault();
+	} else if (e.which == 97) {
+		execute_cmd('southwest');
+	} else if (e.which == 98) {
+		execute_cmd('south');
+	} else if (e.which == 99) {
+		execute_cmd('southeast');
+	} else if (e.which == 100) {
+		execute_cmd('west');
+	} else if (e.which == 102) {
+		execute_cmd('east');
+	} else if (e.which == 103) {
+		execute_cmd('northwest');
+	} else if (e.which == 104) {
+		execute_cmd('north');
+	} else if (e.which == 105) {
+		execute_cmd('northeast');
 	} else if (!e.isDefaultPrevented() && e.which == 13) { // ENTER
 		$('body').append(cmdline);
 		cmdline.css('top', ($('#page').height() - 60) + 'px');
