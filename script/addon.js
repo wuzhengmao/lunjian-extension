@@ -9,7 +9,6 @@
 	var show_attack_target = true;
 	var auto_attack = false;
 	var auto_fight = false;
-	var vs_text1 = '', vs_text2 = '';
 	var user_id_pattern1 = /^u[0-9]+$/;
 	var user_id_pattern2 = /^u[0-9]+\-/;
 	var kuafu_name_pattern = /^\[[0-9]+\]/;
@@ -171,6 +170,9 @@
 			}
 		}
 		_dispatch_message.apply(this, arguments);
+		if (msg.get('type') == 'vs') {
+			console.log(msg);
+		}
 		for ( var i = 0; i < message_listeners.length; i++) {
 			var listener = message_listeners[i];
 			if (!listener.is_pre
@@ -205,6 +207,7 @@
 		}
 		return _make_cmd.apply(this, arguments);
 	};
+	var vs_text1 = '', vs_text2 = '';
 	add_listener(
 			'vs',
 			'',
@@ -218,75 +221,103 @@
 				} else if (msg.get('subtype') == 'playskill'
 						&& parseInt(msg.get('ret')) == 0) {
 					var my_id = window.g_obj_map.get('msg_attrs').get('id');
-					if (msg.get('uid') == my_id) {
-						var vid = msg.get('vid');
-						var vs_info = window.g_obj_map.get('msg_vs_info');
-						if (vs_info) {
-							var v1, v2, p1, p2;
-							for ( var i = 1; i <= 4; i++) {
-								if (vs_info.get('vs1_pos_v' + i) == vid) {
-									v1 = 'vs1';
-									p1 = i;
-									v2 = 'vs2';
-									break;
-								}
-							}
-							if (!v1) {
+					var vs_info = window.g_obj_map.get('msg_vs_info');
+					var pfm = removeSGR(msg.get('name'));
+					var vs_text = skill_chains.indexOf(pfm) >= 0 ? vs_text1
+							+ vs_text2
+							: vs_text2;
+					if (!is_defence(vs_text)) {
+						if (msg.get('uid') == my_id) {
+							var vid = msg.get('vid');
+							if (vs_info) {
+								var v1, v2, p1, p2;
 								for ( var i = 1; i <= 4; i++) {
-									if (vs_info.get('vs2_pos_v' + i) == vid) {
-										v1 = 'vs2';
+									if (vs_info.get('vs1_pos_v' + i) == vid) {
+										v1 = 'vs1';
 										p1 = i;
-										v2 = 'vs1';
+										v2 = 'vs2';
+										break;
+									}
+								}
+								if (!v1) {
+									for ( var i = 1; i <= 4; i++) {
+										if (vs_info.get('vs2_pos_v' + i) == vid) {
+											v1 = 'vs2';
+											p1 = i;
+											v2 = 'vs1';
+											break;
+										}
+									}
+								}
+								for ( var i = 1; i <= 4; i++) {
+									if (is_attack_target(vs_info, [v2, i], pfm, vs_text)) {
+										if (show_attack_target) {
+											notify_fail(HIG + 'ATTACK: '
+													+ vs_info.get(v2 + '_name' + i));
+										}
+										p2 = i;
+										var id = vs_info.get(v2 + '_pos'
+												+ i);
+										if (auto_attack && is_player(id)
+												&& get_friend_index(id) < 0) {
+											auto_pfm(vs_info, pfm, v1, p1,
+													v2, p2);
+										}
 										break;
 									}
 								}
 							}
-							for ( var i = 1; i <= 4; i++) {
-								var name = vs_info.get(v2 + '_name' + i);
-								if (name) {
-									if (my_id.indexOf('-') >= 0
-											&& kuafu_name_pattern.test(name)) {
-										var j = name.indexOf(']');
-										name = name.substr(0, j)
-												+ '区'
-												+ name.substr(j, name.length
-														- j);
-									}
-									var pfm = removeSGR(msg.get('name'));
-									vs_text = skill_chains.indexOf(pfm) >= 0 ? vs_text1
-											+ vs_text2
-											: vs_text2;
-									if (vs_text.indexOf(name) >= 0) {
-										var is_defence = false;
-										for ( var j = 0; j < defence_patterns.length; j++) {
-											if (defence_patterns[j]
-													.test(vs_text)) {
-												is_defence = true;
-												break;
-											}
+						} else if (is_player(msg.get('uid')) {]
+							var pos1 = check_pos(vs_info, myId);
+							if (pos1) {
+								var pos2 = check_pos(vs_info, msg.get('uid'));
+								if (pos2 && pos1[0] != pos2[0]) {
+									var target = 0;
+									for ( var i = 1; i <= 4; i++) {
+										if (i == pos1[1]) {
+											continue;
 										}
-										if (!is_defence) {
-											if (show_attack_target) {
-												notify_fail(HIG + 'ATTACK: '
-														+ name);
-											}
-											p2 = i;
-											var id = vs_info.get(v2 + '_pos'
-													+ i);
-											if (auto_attack && is_player(id)
-													&& get_friend_index(id) < 0) {
-												auto_pfm(vs_info, pfm, v1, p1,
-														v2, p2);
-											}
+										if (is_attack_target(vs_info, [pos1[0], i], pfm, vs_text)) {
+											target = i;
+											break;
 										}
-										break;
 									}
+									if (target == 0 && vs_text.indexOf('你') >= 0) {
+										notify_fail(HIG + 'DEFENCE: '
+												+ vs_info.get(pos2[0] + '_name' + pos2[1]));
+									}
+									// do defence
+									
 								}
 							}
 						}
 					}
 				}
 			});
+	function is_defence(vs_text) {
+		for ( var i = 0; i < defence_patterns.length; i++) {
+			if (defence_patterns[i]
+					.test(vs_text)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	function is_attack_target(vs_info, pos, pfm, vs_text) {
+		var name = vs_info.get(pos[0] + '_name' + pos[1]);
+		if (!name) {
+			return false;
+		}
+		if (my_id.indexOf('-') >= 0
+				&& kuafu_name_pattern.test(name)) {
+			var j = name.indexOf(']');
+			name = name.substr(0, j)
+					+ '区'
+					+ name.substr(j, name.length
+							- j);
+		}
+		return vs_text.indexOf(name) >= 0;
+	}
 	var last_fight_time = 0;
 	var last_kill_time = 0;
 	function try_join_combat(vs_info, target, ignore_check) {
@@ -346,9 +377,13 @@
 		if (vs_info) {
 			for ( var i = 1; i <= 4; i++) {
 				if (vs_info.get('vs1_pos' + i) == target) {
-					return [ 'vs1', i ];
+					if (parseInt(vs_info.get('vs1_pos' + i)) > 0) {
+						return [ 'vs1', i ];
+					}
 				} else if (vs_info.get('vs2_pos' + i) == target) {
-					return [ 'vs2', i ];
+					if (parseInt(vs_info.get('vs2_pos' + i)) > 0) {
+						return [ 'vs2', i ];
+					}
 				}
 			}
 		}
@@ -776,8 +811,7 @@
 				if (subtype == 'add_xdz'
 						|| (subtype == 'attack' && msg.get('rid') == my_id)) {
 					var kee = parseInt(vs_info.get(pos[0] + '_kee' + pos[1]));
-					var max_kee = parseInt(vs_info.get(pos[0] + '_max_kee'
-							+ pos[1]));
+					var max_kee = parseInt(window.g_obj_map.get('max_kee'));
 					if (kee * 100 / max_kee < 50) {
 						var xdz = parseInt(vs_info
 								.get(pos[0] + '_xdz' + pos[1]));
@@ -786,9 +820,9 @@
 							var k = $.inArray(force_skills[i], buttons);
 							if (k >= 0) {
 								clickButton('playskill ' + (k + 1));
-								return;
 							}
 						}
+						return;
 					}
 				}
 				if (subtype == 'add_xdz') {
@@ -808,9 +842,6 @@
 					return;
 				}
 				var subtype = msg.get('subtype');
-				if (subtype == 'playskill' && msg.get('ret') == 0) {
-					
-				}
 				var has_npc1 = has_npc(vs_info, pos[0]);
 				var has_npc2 = has_npc(vs_info, pos[0] == 'vs1' ? 'vs2' : 'vs1');
 				if (has_npc1 && has_npc2) {
@@ -1043,7 +1074,7 @@
 			cmd_busy = false;
 		}
 	};
-	var cmdline = $('<div id="cmdline" style="position: fixed; left: 0px; top: 0px; width: 503px; height: 44px; border: 1px solid rgb(53, 37, 21);"><table align="center" border="0" style="width:100%"><tr><td style="width:65%" align="left"><input id="cmd_box" class="chat_input" type="text" value=""></td><td style="width:35%" align="left"><button type="button" cellpadding="0" cellspacing="0" onclick="sendCommand();" class="cmd_click3"><span class="out2">发送</span></button></td></tr></table></div>');
+	var cmdline = $('<div id="cmdline" style="position: fixed; left: 0px; top: 0px; width: 503px; height: 44px; border: 1px solid rgb(53, 37, 21);"><table align="center" border="0" style="width:100%"><tr><td style="width:65%" align="left"><input id="cmd_box" class="chat_input" type="text" value=""></td><td style="width:35%" align="left"><button type="button" cellpadding="0" cellspacing="0" class="cmd_click3"><span class="out2">发送</span></button></td></tr></table></div>');
 	var cmdbox = $(':text', cmdline);
 	var history_cmds = [];
 	var select_index = -1;
@@ -1052,8 +1083,7 @@
 			cmdline.detach();
 			e.preventDefault();
 		} else if (e.which == 13) { // ENTER
-			cmdline.detach();
-			sendCommand();
+			$(':button', cmdline).click();
 			e.preventDefault();
 		} else if (e.which == 38) { // UP
 			if (select_index > 0) {
@@ -1070,6 +1100,10 @@
 				e.preventDefault();
 			}
 		}
+	});
+	$(':button', cmdline).click(function(e) {
+		cmdline.detach();
+		sendCommand();
 	});
 	function sendCommand() {
 		var cmd = $.trim(cmdbox.val());
@@ -1130,6 +1164,10 @@
 				} else if (e.which == 105) {
 					execute_cmd('northeast');
 				} else if (!e.isDefaultPrevented() && e.which == 13) { // ENTER
+					var $e = $('#chat_msg');
+					if ($e.length > 0 && document.activeElement == $e[0]) {
+						return true;
+					}
 					$('body').append(cmdline);
 					cmdline.css('top', ($('#page').height() - 60) + 'px');
 					if (history_cmds.length > 0) {
