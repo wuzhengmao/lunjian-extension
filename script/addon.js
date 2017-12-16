@@ -65,6 +65,7 @@
 	aliases.put('xuantie', 'fly 35;nw;nw;nw;n;ne;nw\nw;nw;e;e;e;e;e;se;n;n;w;n;w;event_1_53278632');
 	aliases.put('toushi', 'fly 37;n;e;e;nw;nw;w;n;e;n;e;e;e;ne;ne;ne;se;n');
 	aliases.put('shilian', 'fly 14;sw;s;e;s;s;sw;sw;w;w;s;s;e;e;e;n;ne');
+	aliases.put('shejian', 'fly 28;n;w;w;w;w;w;w;nw;ne;nw;ne;nw;ne;e');
 	var map_ids = new Map();
 	map_ids.put('xueting', '1');
 	map_ids.put('xt', '1');
