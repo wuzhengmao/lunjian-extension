@@ -373,7 +373,8 @@
 		var has_pos = false;
 		var player_id = null;
 		var k = -1;
-		if (removeSGR(vs_info.get(pos[0] + '_name' + pos[1])) == '天剑真身') {
+		var pos1_name = removeSGR(vs_info.get(pos[0] + '_name' + pos[1]));
+		if (pos1_name == '天剑真身' || pos1_name == '年兽') {
 			has_npc = true;
 		}
 		for ( var i = 1; i <= 4; i++) {
