@@ -813,6 +813,9 @@
 							clickButton('get ' + msg.get('id'));
 							console.log('ok!');
 							stop_task();
+							if (target[1] == '年兽') {
+								execute_cmd('#loop get ' + msg.get('id'));
+							}
 						}
 					}, true);
 				} else {
@@ -834,6 +837,9 @@
 															+ msg.get('id'));
 													console.log('ok!');
 													stop_task();
+													if (name == '年兽') {
+														execute_cmd('#loop get ' + msg.get('id'));
+													}
 												}
 											}, true);
 								}
