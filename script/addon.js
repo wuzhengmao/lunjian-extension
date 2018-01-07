@@ -66,6 +66,7 @@
 	aliases.put('toushi', 'fly 37;n;e;e;nw;nw;w;n;e;n;e;e;e;ne;ne;ne;se;n');
 	aliases.put('shilian', 'fly 14;sw;s;e;s;s;sw;sw;w;w;s;s;e;e;e;n;ne');
 	aliases.put('shejian', 'fly 28;n;w;w;w;w;w;w;nw;ne;nw;ne;nw;ne;e');
+	aliases.put('tingqin', 'fly 5;n;n;n;n;n;n;n;n;w;w;w;s;e;e;s;s;e;e;s;s;s');
 	aliases.put('tianshan1', 'fly 39;ne;e;n;ne;ne;n;ne;nw');
 	aliases.put('tianshan2', 'nw;n;ne;nw;nw;w;n;n');
 	aliases.put('wudu1', 'fly 40;s;s;s;s;e;s;se;sw;s;s;s;e;e;sw;se;sw;se');
