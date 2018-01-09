@@ -679,6 +679,7 @@
 							remove_listener(h_listener);
 							h_listener = undefined;
 						} else {
+							is_started = false;
 							perform();
 						}
 					} else {
