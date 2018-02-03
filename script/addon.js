@@ -150,6 +150,10 @@
 	map_ids.put('jqg', '37');
 	map_ids.put('bihai', '38');
 	map_ids.put('bh', '38');
+	map_ids.put('tianshan', '39');
+	map_ids.put('ts2', '39');
+	map_ids.put('miaojiang', '40');
+	map_ids.put('mj3', '40');
 	var secrets = new Map();
 	secrets.put("lvshuige", 1255);
 	secrets.put("daojiangu", 1535);
@@ -162,6 +166,8 @@
 	secrets.put("dafuchuan", 3090);
 	secrets.put("binhaigucheng", 3385);
 	secrets.put("baguamen", 3635);
+	secrets.put("nanmanzhidi", 3890);
+	secrets.put("fengduguicheng", 3890);
 	var message_listeners = [];
 	var listener_seq = 0;
 	function add_listener(type, subtype, fn, is_pre) {
@@ -261,7 +267,7 @@
 							var vid = msg.get('vid');
 							if (vs_info) {
 								var v1, v2, p1, p2;
-								for ( var i = 1; i <= 4; i++) {
+								for ( var i = 1; i <= 8; i++) {
 									if (vs_info.get('vs1_pos_v' + i) == vid) {
 										v1 = 'vs1';
 										p1 = i;
@@ -270,7 +276,7 @@
 									}
 								}
 								if (!v1) {
-									for ( var i = 1; i <= 4; i++) {
+									for ( var i = 1; i <= 8; i++) {
 										if (vs_info.get('vs2_pos_v' + i) == vid) {
 											v1 = 'vs2';
 											p1 = i;
@@ -279,7 +285,7 @@
 										}
 									}
 								}
-								for ( var i = 1; i <= 4; i++) {
+								for ( var i = 1; i <= 8; i++) {
 									if (is_attack_target(vs_info, my_id, [v2, i], pfm, vs_text)) {
 										if (show_target) {
 											notify_fail(HIG + 'ATTACK: '
@@ -303,7 +309,7 @@
 								var pos2 = check_pos(vs_info, msg.get('uid'));
 								if (pos2 && pos1[0] != pos2[0]) {
 									var target = 0;
-									for ( var i = 1; i <= 4; i++) {
+									for ( var i = 1; i <= 8; i++) {
 										if (i == pos1[1]) {
 											continue;
 										}
@@ -382,7 +388,7 @@
 		if (pos1_name == '天剑真身' || pos1_name == '年兽') {
 			has_npc = true;
 		}
-		for ( var i = 1; i <= 4; i++) {
+		for ( var i = 1; i <= 8; i++) {
 			if (!has_npc || !has_pos) {
 				var kee = vs_info.get(side + '_kee' + i);
 				if (kee && parseInt(kee) > 0) {
@@ -425,7 +431,7 @@
 	}
 	function check_pos(vs_info, target) {
 		if (vs_info) {
-			for ( var i = 1; i <= 4; i++) {
+			for ( var i = 1; i <= 8; i++) {
 				if (vs_info.get('vs1_pos' + i) == target) {
 					if (parseInt(vs_info.get('vs1_kee' + i)) > 0) {
 						return [ 'vs1', i ];
@@ -532,7 +538,7 @@
 				side = side == 'vs1' ? 'vs2' : 'vs1';
 			}
 			var npc_id = null;
-			for ( var i = 1; i <= 4; i++) {
+			for ( var i = 1; i <= 8; i++) {
 				var kee = vs_info.get(side + '_kee' + i);
 				if (kee && parseInt(kee) > 0) {
 					var id = vs_info.get(side + '_pos' + i);
@@ -606,7 +612,7 @@
 		return false;
 	}
 	function has_npc(vs_info, side) {
-		for (var i = 1; i <= 4; i++) {
+		for (var i = 1; i <= 8; i++) {
 			if (!is_player(vs_info.get(side + '_pos' + i))) {
 				var kee = vs_info.get(side + '_kee' + i);
 				if (kee && parseInt(kee) > 0) {
@@ -617,7 +623,7 @@
 		return false;
 	}
 	function has_power_player(vs_info, side) {
-		for (var i = 1; i <= 4; i++) {
+		for (var i = 1; i <= 8; i++) {
 			if (is_player(vs_info.get(side + '_pos' + i))) {
 				var kee = vs_info.get(side + '_kee' + i);
 				if (kee && parseInt(kee) > 0) {
@@ -1185,6 +1191,21 @@
 			var target = find_target(args[1], [ 'item' ]);
 			if (target) {
 				args[1] = target[0];
+			}
+		} else if (args[0] == 'loot') {
+			var room = window.g_obj_map.get('msg_room');
+			if (room) {
+				args[1] = '';
+				for ( var t, i = 1; (t = room.get('item' + i)) != undefined; i++) {
+					var s = t.split(',');
+					if (s.length > 1 && /.+的尸体$/.test(removeSGR(s[1]))) {
+						if (args[1].length > 0) {
+							args[1] += '\nget ';
+						}
+						args[1] += s[0];
+					}
+				}
+				args[0] = args[1].length > 0 ? 'get' : '';
 			}
 		} else if (args[0] == 'east' || args[0] == 'south' || args[0] == 'west'
 				|| args[0] == 'north' || args[0] == 'southeast'
