@@ -756,7 +756,7 @@
 		}
 		return null;
 	}
-	var task_h_timer, task_h_listener;
+	var task_h_timer, task_h_listener, hongbao_h_listener;
 	function stop_task() {
 		if (task_h_timer) {
 			clearInterval(task_h_timer);
@@ -1027,6 +1027,25 @@
 					
 				}
 			});
+		} else if (cmd == '#t+ hongbao') {
+			if (!hongbao_h_listener) {
+				console.log('open hongbao trigger...');
+				hongbao_h_listener = add_listener('main_msg', '',
+						function(msg) {
+							if (msg.get('ctype') == 'text') {
+								var r = msg.get('msg').match(/hongbao qiang (.+) gn(\d+)/);
+								if (r) {
+									send_cmd('hongbao qiang ' + r[1] + ' gn' + r[2]);
+								}
+							}
+						}, true);
+			}
+		} else if (cmd == '#t- hongbao') {
+			if (hongbao_h_listener) {
+				console.log('close hongbao trigger...');
+				remove_listener(hongbao_h_listener);
+				hongbao_h_listener = undefined;
+			}
 		} else if (cmd.substr(0, 7) == '#alias ') {
 			var alias = $.trim(cmd.substr(7));
 			var key, value, i = alias.indexOf(' ');
