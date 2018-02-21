@@ -71,6 +71,7 @@
 	aliases.put('tianshan2', 'nw;n;ne;nw;nw;w;n;n');
 	aliases.put('wudu1', 'fly 40;s;s;s;s;e;s;se;sw;s;s;s;e;e;sw;se;sw;se');
 	aliases.put('wudu2', 'se;s;s;e;n;n;e;s;e;ne;s;sw;e;e;ne;ne;nw;ne;ne;n');
+	aliases.put('dishi', 'fly 2;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;n;w;s;s;s;s;e;event_1_2215721');
 	var map_ids = new Map();
 	map_ids.put('xueting', '1');
 	map_ids.put('xt', '1');
@@ -1166,24 +1167,51 @@
 			}
 		}
 	}
-	var hongbao_h_listener, last_hongbao_time = 0;
-	hongbao_h_listener = add_listener(['main_msg', 'notice'], '',
+	var hongbao_h_listener, hongbao_list = [], hongbao_timer, hongbao_full1 = false, hongbao_full2 = false;
+	hongbao_h_listener = add_listener(['channel', 'notice'], '',
 			function(msg) {
-				if (msg.get('type') == 'main_msg' && msg.get('ctype') == 'text') {
+				if (msg.get('type') == 'channel' && msg.get('subtype') == 'hongbao') {
 					var r = msg.get('msg').match(/hongbao qiang (.+) gn(\d+)/);
 					if (r) {
-						var t = new Date().getTime();
-						if (t - last_hongbao_time >= 3000) {
-							last_hongbao_time = t;
-							send_cmd('hongbao qiang ' + r[1] + ' gn' + r[2]);
+						if ((r[1] == '1' && !hongbao_full1) || (r[1] == '2' && !hongbao_full2)) {
+							hongbao_list.push(r[0]);
+							if (!hongbao_timer) {
+								hongbao_timer = setTimeout(get_hongbao, 100);
+							}
 						}
 					}
 				} else if (msg.get('type') == 'notice' && msg.get('subtype') == 'notify_fail') {
-					if (/你就抢新春红包的次数已达到上限了，明天再抢吧。/.test(msg.get('msg'))) {
+					if (!hongbao_full1 && /你就抢狗年红包的次数已达到上限了，明天再抢吧。/.test(msg.get('msg'))) {
+						hongbao_full1 = true;
+						hongbao_list = [];
+					} else if (!hongbao_full2 && /你就抢新春红包的次数已达到上限了，明天再抢吧。/.test(msg.get('msg'))) {
+						hongbao_full2 = true;
+						hongbao_list = [];
+					}
+					if (hongbao_full1 && hongbao_full2) {
 						remove_listener(hongbao_h_listener);
+						hongbao_h_listener = undefined;
+						if (hongbao_timer) {
+							clearTimeout(hongbao_timer);
+							hongbao_timer = undefined;
+						}
 					}
 				}
 			});
+	function get_hongbao() {
+		if (hongbao_list.length == 0) {
+			return;
+		}
+		var i = Math.floor(Math.random() * hongbao_list.length);
+		var cmd = hongbao_list[i];
+		hongbao_list.splice(i, 1);
+		send_cmd(cmd);
+		if (hongbao_list.length > 0) {
+			hongbao_timer = setTimeout(get_hongbao, 5000);
+		} else {
+			hongbao_timer = undefined;
+		}
+	}
 	function process_cmdline(line) {
 		var pc = [ '', true ];
 		var arr = line.split(';');
