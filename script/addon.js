@@ -1167,7 +1167,7 @@
 			}
 		}
 	}
-	var hongbao_h_listener, hongbao_list = [], hongbao_timer, hongbao_full1 = false, hongbao_full2 = false;
+/*	var hongbao_h_listener, hongbao_list = [], hongbao_timer, hongbao_full1 = false, hongbao_full2 = false;
 	hongbao_h_listener = add_listener(['channel', 'notice'], '',
 			function(msg) {
 				if (msg.get('type') == 'channel' && msg.get('subtype') == 'hongbao') {
@@ -1211,7 +1211,7 @@
 		} else {
 			hongbao_timer = undefined;
 		}
-	}
+	} */
 	function process_cmdline(line) {
 		var pc = [ '', true ];
 		var arr = line.split(';');
